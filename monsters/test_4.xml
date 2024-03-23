@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<monster name="Test 4" race="energy" experience="127" speed="91" manacost="200">
+    <health now="695" max="695"/>
+    <look type="17" corpse="9962"/>
+    <targetchange interval="5000" chance="0"/>
+    <flags>
+        <flag summonable="0"/>
+        <flag attackable="1"/>
+        <flag hostile="0"/>
+        <flag illusionable="0"/>
+        <flag convinceable="0"/>
+        <flag pushable="0"/>
+        <flag canpushitems="0"/>
+        <flag canpushcreatures="0"/>
+        <flag targetdistance="0"/>
+        <flag staticattack="0"/>
+        <flag runonhealth="0"/>
+        <flag canwalkonenergy="0"/>
+        <flag canwalkonfire="0"/>
+        <flag canwalkonpoison="0"/>
+    </flags>
+    <attacks>
+        <attack name="melee" interval="861" min="-21" max="-87"/>
+        <attack name="earth" interval="736" min="-2" max="-8" length="3" spread="2"/>
+        <attack name="manadrain" interval="1692" min="-15" max="-61" length="7" spread="3"/>
+    </attacks>
+    <defenses armor="25" defense="25"/>
+    <loot>
+        <item name="gold pixel coin" countmax="5" chance="26958"/>
+        <item name="2696" countmax="4" chance="58249"/>
+    </loot>
+</monster>

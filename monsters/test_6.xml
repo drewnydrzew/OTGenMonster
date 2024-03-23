@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<monster name="Test 6" race="undead" experience="189" speed="84" manacost="200">
+    <health now="474" max="474"/>
+    <look type="17" corpse="9962"/>
+    <targetchange interval="5000" chance="0"/>
+    <flags>
+        <flag summonable="0"/>
+        <flag attackable="1"/>
+        <flag hostile="0"/>
+        <flag illusionable="0"/>
+        <flag convinceable="0"/>
+        <flag pushable="0"/>
+        <flag canpushitems="0"/>
+        <flag canpushcreatures="0"/>
+        <flag targetdistance="0"/>
+        <flag staticattack="0"/>
+        <flag runonhealth="0"/>
+        <flag canwalkonenergy="0"/>
+        <flag canwalkonfire="0"/>
+        <flag canwalkonpoison="0"/>
+    </flags>
+    <attacks>
+        <attack name="melee" interval="827" min="-10" max="-40"/>
+        <attack name="speed" interval="1007" min="-19" max="-78" range="7" radius="5"/>
+        <attack name="holy" interval="2336" min="0" max="-3" range="5" radius="5"/>
+    </attacks>
+    <defenses armor="30" defense="30"/>
+    <loot>
+        <item name="gold pixel coin" countmax="4" chance="41878"/>
+        <item name="2696" countmax="4" chance="26586"/>
+    </loot>
+</monster>

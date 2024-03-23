@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<monster name="Test 3" race="fire" experience="160" speed="71" manacost="200">
+    <health now="361" max="361"/>
+    <look type="17" corpse="9962"/>
+    <targetchange interval="5000" chance="0"/>
+    <flags>
+        <flag summonable="0"/>
+        <flag attackable="1"/>
+        <flag hostile="0"/>
+        <flag illusionable="0"/>
+        <flag convinceable="0"/>
+        <flag pushable="0"/>
+        <flag canpushitems="0"/>
+        <flag canpushcreatures="0"/>
+        <flag targetdistance="0"/>
+        <flag staticattack="0"/>
+        <flag runonhealth="0"/>
+        <flag canwalkonenergy="0"/>
+        <flag canwalkonfire="0"/>
+        <flag canwalkonpoison="0"/>
+    </flags>
+    <attacks>
+        <attack name="melee" interval="1602" min="-45" max="-182"/>
+    </attacks>
+    <defenses armor="16" defense="16"/>
+    <loot>
+        <item name="gold pixel coin" countmax="4" chance="34951"/>
+        <item name="2696" countmax="6" chance="20086"/>
+    </loot>
+</monster>

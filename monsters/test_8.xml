@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<monster name="Test 8" race="venom" experience="165" speed="85" manacost="200">
+    <health now="503" max="503"/>
+    <look type="17" corpse="9962"/>
+    <targetchange interval="5000" chance="0"/>
+    <flags>
+        <flag summonable="0"/>
+        <flag attackable="1"/>
+        <flag hostile="0"/>
+        <flag illusionable="0"/>
+        <flag convinceable="0"/>
+        <flag pushable="0"/>
+        <flag canpushitems="0"/>
+        <flag canpushcreatures="0"/>
+        <flag targetdistance="0"/>
+        <flag staticattack="0"/>
+        <flag runonhealth="0"/>
+        <flag canwalkonenergy="0"/>
+        <flag canwalkonfire="0"/>
+        <flag canwalkonpoison="0"/>
+    </flags>
+    <attacks>
+        <attack name="melee" interval="1984" min="-36" max="-147"/>
+        <attack name="holy" interval="2456" min="-11" max="-44" range="6" radius="6"/>
+        <attack name="outfit" interval="2040" min="-1" max="-5" monster="Test 8" duration="34955" length="7" spread="1"/>
+        <attack name="outfit" interval="742" min="-1" max="-5" length="5" spread="1"/>
+    </attacks>
+    <defenses armor="4" defense="4"/>
+    <loot>
+        <item name="gold pixel coin" countmax="2" chance="20153"/>
+        <item name="2696" countmax="4" chance="61153"/>
+    </loot>
+</monster>
