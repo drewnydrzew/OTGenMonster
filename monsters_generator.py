@@ -4,11 +4,9 @@ from xml.etree.ElementTree import Element, SubElement, tostring
 from xml.dom.minidom import parseString
 import json
 
-# Wczytanie danych z arkusza kalkulacyjnego
 file_path = 'input.ods'
 data = pd.read_excel(file_path, engine='odf')
 
-# Przygotowanie wartości minimalnych i maksymalnych
 min_values = data.iloc[0].to_dict()
 max_values = data.iloc[1].to_dict()
 
@@ -35,7 +33,6 @@ def generate_loot(base_loot_json_min, base_loot_json_max, additional_loot_json):
 def generate_elements(monster, elements_min, elements_max):
     elements_count = random.randint(0, 6)  
     
-    print(elements_count)
     if elements_count != 0:
         elements_element = SubElement(monster, 'elements')
         for _ in range(elements_count):
@@ -50,18 +47,18 @@ def add_defenses_to_monster(monster, hp, speed):
     defenses_element = SubElement(monster, 'defenses', {'armor': "15", 'defense': "15"})
 
     # Healing
-    if random.choice([True, False]):  # Losowe dodanie healing
-        max_healing = int(0.1 * hp)  # Max 10% of max health
+    if random.choice([True, False]):  
+        max_healing = int(0.1 * hp)  
         SubElement(defenses_element, 'defense', {
             'name': "healing",
             'interval': str(random.randint(1000, 2500)),
             'chance': str(random.randint(5, 15)),
-            'min': str(int(0.05 * max_healing)),  # Przykładowe wartości
+            'min': str(int(0.05 * max_healing)),  
             'max': str(max_healing),
         })
 
     # Speed
-    if random.choice([True, False]):  # Losowe dodanie speed
+    if random.choice([True, False]):  
         speedchange = random.randint(int(speed * 1.2), 1000)
         duration = random.randint(5000, 60000)
         speed_defense = SubElement(defenses_element, 'defense', {
@@ -74,7 +71,7 @@ def add_defenses_to_monster(monster, hp, speed):
         SubElement(speed_defense, 'attribute', {'key': "areaEffect", 'value': "redshimmer"})
 
     # Invisible
-    if random.choice([True, False]):  # Losowe dodanie invisible
+    if random.choice([True, False]):  
         duration = random.randint(5000, 60000)
         invisible_defense = SubElement(defenses_element, 'defense', {
             'name': "invisible",
@@ -85,7 +82,7 @@ def add_defenses_to_monster(monster, hp, speed):
         SubElement(invisible_defense, 'attribute', {'key': "areaEffect", 'value': "blueshimmer"})
 
     # Outfit
-    if random.choice([True, False]):  # Losowe dodanie outfit
+    if random.choice([True, False]): 
         duration = random.randint(5000, 60000)
         monster_names = data['NAME'].dropna().tolist()
         monster_name = random.choice(monster_names)
@@ -96,165 +93,9 @@ def add_defenses_to_monster(monster, hp, speed):
             'monster': monster_name,
             'duration': str(duration),
         })
-        # Możesz dodać dodatkowe atrybuty, jeśli potrzebujesz
-
-# def add_attacks_to_monster(monster, dps, attacks_count):
-#     area_effects = [
-#         "bluebubble", "blackspark", "explosion", "firearea", "yellowbubble", "greenbubble",
-#         "energy", "mortarea", "poison", "fireattack", "thunder", "smallplants", "energyarea",
-#         "plantattack", "earth", "ice", "energy", "fire", "death", "holy"
-#     ]
-#     shoot_effects = ["earth", "poison"]
-
-#     # Definiowanie dostępnych typów ataków
-#     primary_attacks = ["melee", "physical", "earth", "ice", "energy", "fire", "death", "holy"]
-#     additional_attacks = [
-#         "physical", "earth", "ice", "energy", "fire", "death", "holy"
-#         "poison", "drown", "lifedrain", "manadrain", "speed", "drunk", "outfit",
-#         "poisoncondition", "freezecondition", "firecondition", "energycondition", "drowncondition",
-#         "bleedcondition", "betrayed wraith skill reducer", "drown"
-#     ]
-
-#     selected_attacks = []
-
-#     # Dodawanie ataków
-#     attacks_element = SubElement(monster, 'attacks')
-#     for _ in range(attacks_count):
-#         attack_name = random.choice(attack_types)
-#         interval = random.randint(500, 2500)
-#         min_damage = -random.randint(1, int(dps / attacks_count / 4))
-#         max_damage = -random.randint(int(dps / attacks_count), int(dps / attacks_count * 1.25))
-#         chance = random.randint(10, 20) if attack_name != "melee" else None
-#         target = random.choice([0, 1])
-
-#         attack_attributes = {
-#             'name': attack_name,
-#             'interval': str(interval),
-#             'min': str(min_damage),
-#             'max': str(max_damage)
-#         }
-#         if chance:
-#             attack_attributes['chance'] = str(chance)
-#         if target == 1:
-#             attack_attributes['target'] = str(target)
-
-#         # Tworzenie elementu ataku bez atrybutów 'shootEffect' lub 'areaEffect'
-#         attack_element = SubElement(attacks_element, 'attack', attack_attributes)
-
-#         # Dodajemy efekt jako oddzielny element 'attribute' zamiast jako atrybut 'attack'
-#         effect_type = 'shootEffect' if target == 1 else 'areaEffect'
-#         effect_value = random.choice(shoot_effects) if target == 1 else random.choice(area_effects)
-#         attribute_element = SubElement(attack_element, 'attribute', {'key': effect_type, 'value': effect_value})
-
-# def add_attacks_to_monster(monster, dps, attacks_count):
-#     primary_attacks = ["melee", "physical", "earth", "ice", "energy", "fire", "death", "holy"]
-#     additional_attacks = [
-#         "poison", "drown", "lifedrain", "manadrain", "speed", "drunk", "outfit",
-#         "poisoncondition", "freezecondition", "firecondition", "energycondition", "drowncondition",
-#         "bleedcondition", "betrayed wraith skill reducer", "drown"
-#     ]
-#     area_effects = [
-#         "bluebubble", "blackspark", "explosion", "firearea", "yellowbubble", "greenbubble",
-#         "energy", "mortarea", "poison", "fireattack", "thunder", "smallplants", "energyarea",
-#         "plantattack", "earth", "ice", "energy", "fire", "death", "holy"
-#     ]
-#     shoot_effects = ["earth", "poison"]
-
-#     selected_attacks = []
-
-#     # Losowanie ataków z podstawowych i dodatkowych, zapobieganie duplikatom
-#     if attacks_count == 1:
-#         selected_attacks.append(random.choice(primary_attacks))
-#     else:
-#         selected_attacks.append(random.choice(primary_attacks))
-#         while len(selected_attacks) < attacks_count:
-#             next_attack = random.choice(primary_attacks + additional_attacks)
-#             if next_attack not in selected_attacks:
-#                 selected_attacks.append(next_attack)
-
-#     attacks_element = SubElement(monster, 'attacks')
-#     for attack_name in selected_attacks:
-#         interval = random.randint(500, 2500)
-#         min_damage = -random.randint(1, int(dps / attacks_count / 4))
-#         max_damage = -random.randint(int(dps / attacks_count), int(dps / attacks_count * 1.25))
-#         target = random.choice([0, 1])
-
-#         attack_attributes = {
-#             'name': attack_name,
-#             'interval': str(interval),
-#             'min': str(min_damage),
-#             'max': str(max_damage),
-#             'target': str(target)
-#         }
-#         # Dodanie szansy dla ataków innych niż "melee"
-#         if attack_name != "melee":
-#             attack_attributes['chance'] = str(random.randint(10, 20))
-
-#         attack_element = SubElement(attacks_element, 'attack', attack_attributes)
-
-#         # Dodanie efektów do ataku
-#         if attack_name in additional_attacks:
-#             effect_type, effect_value = ("shootEffect", random.choice(shoot_effects)) if target == 1 else ("areaEffect", random.choice(area_effects))
-#             SubElement(attack_element, effect_type, value=effect_value)
-
-
-# def add_attacks_to_monster_xml(monster, dps, attacks_count):
-#     melee_attacks = ["melee"]
-#     area_radius_attacks = ["physical", "earth", "ice", "energy", "fire", "death", "holy"]
-#     area_wave_attacks = ["energy", "ice", "earth"]  # Przykładowe ataki typu wave
-#     area_effects = ["firearea", "energyarea", "icearea", "eartharea"]
-#     shoot_effects = ["earth", "poison"]
-
-#     selected_attacks = []
-
-#     if attacks_count == 1:
-#         selected_attack_type = random.choice(["melee", "radius", "wave"])
-#     else:
-#         selected_attack_type = random.choice(["radius", "wave"])
-
-#     if selected_attack_type == "melee":
-#         selected_attacks.append(random.choice(melee_attacks))
-#     elif selected_attack_type == "radius":
-#         selected_attacks.extend(random.sample(area_radius_attacks, attacks_count))
-#     elif selected_attack_type == "wave":
-#         selected_attacks.extend(random.sample(area_wave_attacks, attacks_count))
-
-#     attacks_element = SubElement(monster, 'attacks')
-#     for attack_name in selected_attacks:
-#         attack_element = SubElement(attacks_element, 'attack', {
-#             'name': attack_name,
-#             'interval': str(random.randint(500, 2500)),
-#             'min': str(-random.randint(1, int(dps / attacks_count / 4))),
-#             'max': str(-random.randint(int(dps / attacks_count), int(dps / attacks_count * 1.25))),
-#             'target': str(random.choice([0, 1]))
-#         })
-
-#         if selected_attack_type in ["radius", "wave"]:
-#             target = attack_element.get('target')
-#             if target == "1":
-#                 shoot_effect_value = random.choice(shoot_effects)
-#                 SubElement(attack_element, 'attribute', {'key': 'shootEffect', 'value': shoot_effect_value})
-#                 if random.choice([True, False]):
-#                     area_effect_value = random.choice(area_effects)
-#                     SubElement(attack_element, 'attribute', {'key': 'areaEffect', 'value': area_effect_value})
-#             else:
-#                 area_effect_value = random.choice(area_effects)
-#                 SubElement(attack_element, 'attribute', {'key': 'areaEffect', 'value': area_effect_value})
-#                 if random.choice([True, False]):
-#                     shoot_effect_value = random.choice(shoot_effects)
-#                     SubElement(attack_element, 'attribute', {'key': 'shootEffect', 'value': shoot_effect_value})
-
-#             if selected_attack_type == "radius":
-#                 attack_element.set('range', str(random.randint(1, 7)))
-#                 attack_element.set('radius', str(random.randint(0, 9)))
-#             elif selected_attack_type == "wave":
-#                 attack_element.set('length', str(random.randint(1, 8)))
-#                 attack_element.set('spread', str(random.randint(0, 3)))
-
+       
 def distribute_dps(dps, attacks_count):
-    """
-    Losowo dzieli DPS na ataki, zwracając listę DPS dla każdego ataku.
-    """
+
     percentages = sorted([random.random() for _ in range(attacks_count - 1)] + [0, 1])
     return [round((percentages[i+1] - percentages[i]) * dps) for i in range(attacks_count)]
 
@@ -266,18 +107,14 @@ def add_attacks_to_monster(monster, dps, attacks_count):
                             "bleedcondition", "betrayed wraith skill reducer", "drown"]
 
 
-    area_wave_attacks = area_radius_attacks  # Używamy tej samej listy dla uproszczenia
+    area_wave_attacks = area_radius_attacks 
 
-    # Rozkład DPS
     dps_distribution = distribute_dps(dps, attacks_count)
 
-    # Dodawanie ataku typu "melee"
-    add_melee_attack(monster, dps_distribution[0], 1)  # Tylko jeden atak typu "melee"
+    add_melee_attack(monster, dps_distribution[0], 1)  
 
-    # Dodawanie pozostałych ataków
     if attacks_count > 1:
         for i in range(1, attacks_count):
-            # Losowanie typu dodatkowego ataku
             attack_type = random.choice(["radius", "wave"])
             if attack_type == "radius":
                 add_area_radius_attack(monster, random.choice(area_radius_attacks), dps_distribution[i])
@@ -357,27 +194,7 @@ def add_area_wave_attack(monster, attack_name, dps):
             'spread': str(random.randint(0, 3)),
         })
 
-# def add_target_attack(monster, attack_name, dps, area_effects, shoot_effects):
-#     target = random.choice([0, 1])
-#     attack_attributes = {
-#         'name': attack_name,
-#         'interval': str(random.randint(500, 2500)),
-#         'min': str(-random.randint(10, 100)),
-#         'max': str(-random.randint(100, 1000)),
-#         'target': str(target),
-#     }
-#     attack_element = SubElement(monster, 'attack', attack_attributes)
-#     if target == 1:
-#         SubElement(attack_element, 'attribute', {'key': 'shootEffect', 'value': random.choice(shoot_effects)})
-#     else:
-#         SubElement(attack_element, 'attribute', {'key': 'areaEffect', 'value': random.choice(area_effects)})
 
-
-
-
-
-
-# Funkcja do generowania potworów
 def generate_monster(row, min_values, max_values):
     name = row['NAME'] if pd.notna(row['NAME']) else "Unnamed Monster"
     hp = int(row['HP']) if pd.notna(row['HP']) else random.randint(int(min_values['HP']), int(max_values['HP']))
@@ -400,13 +217,12 @@ def generate_monster(row, min_values, max_values):
 
 
 
-    # Generowanie XML
     monster = Element('monster', {
         'name': name,
         'race': race,
         'experience': str(exp),
         'speed': str(speed),
-        'manacost': "200"  # Stała wartość
+        'manacost': "200"  
     })
     
     health = SubElement(monster, 'health', {
@@ -418,20 +234,17 @@ def generate_monster(row, min_values, max_values):
         'corpse': "9962"
     })
 
-    # Targetchange element
     targetchange = SubElement(monster, 'targetchange', {
         'interval': "5000",
         'chance': "0"
     })
 
-    # Flags element (tutaj używam przykładowych wartości dla flag, można dostosować)
     flags = SubElement(monster, 'flags')
     for flag in ['summonable', 'attackable', 'hostile', 'illusionable', 'convinceable', 
                  'pushable', 'canpushitems', 'canpushcreatures', 'targetdistance', 
                  'staticattack', 'runonhealth', 'canwalkonenergy', 'canwalkonfire', 'canwalkonpoison']:
         SubElement(flags, 'flag', {flag: "1" if flag == 'attackable' else "0"})
 
-    # Dodawanie ataków
     attacks_container = SubElement(monster, 'attacks')
 
     add_attacks_to_monster(attacks_container, dps, attacks_count)
@@ -446,9 +259,8 @@ def generate_monster(row, min_values, max_values):
         voices = SubElement(monster, 'voices')
         sentences = row['SENTENCES'].split(';')
         for sentence in sentences:
-            # Usuwamy białe znaki na początku i na końcu każdej sentencji
             clean_sentence = sentence.strip()
-            if clean_sentence:  # Upewniamy się, że sentencja nie jest pusta
+            if clean_sentence:  
                 SubElement(voices, 'voice', {'sentence': clean_sentence})
             
 
@@ -465,19 +277,16 @@ def generate_monster(row, min_values, max_values):
 
     raw_xml = tostring(monster, 'utf-8', method='xml')
 
-    # Użyj parseString, aby sformatować bajty XML
     pretty_xml_as_string = parseString(raw_xml).toprettyxml(indent="    ", encoding='UTF-8')
    
     return pretty_xml_as_string, name.lower().replace(" ", "_")
 
-# Generowanie i zapisywanie potworów do plików
-# Załóżmy, że twoja funkcja `generate_monster` zwraca XML jako bajty
-# Musisz zdekodować bajty do str przed zapisaniem do pliku
+
 for i, row in data.iterrows():
-    if pd.isna(row['NAME']) or i < 2:  # Skip the first two rows with min and max values
+    if pd.isna(row['NAME']) or i < 2:  
         continue
     monster_xml_bytes, file_name = generate_monster(row, min_values, max_values)
-    monster_xml_str = monster_xml_bytes.decode('utf-8')  # Decode bytes to str
+    monster_xml_str = monster_xml_bytes.decode('utf-8')  
     file_path = f'monsters/{file_name}.xml'
     with open(file_path, 'w', encoding='utf-8') as file:  # Ensure the file is opened with utf-8 encoding
         file.write(monster_xml_str)  # Write the decoded string, not bytes
