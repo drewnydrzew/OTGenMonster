@@ -5,10 +5,56 @@ from xml.dom.minidom import parseString
 import json
 
 file_path = 'input.ods'
+output_file_path = 'output.ods'
 data = pd.read_excel(file_path, engine='odf')
+
+monster_attacks_output = []
+monster_defenses_output = []
+
+all_monsters_df = pd.DataFrame()
+
 
 min_values = data.iloc[0].to_dict()
 max_values = data.iloc[1].to_dict()
+
+def create_monster_df_row(name, hp, exp, race, speed, dps, attacks_count, attacks,
+                          armor_defense, defenses_count, defense, loot, monster_xml_tfs, monster_xml_rme):
+    """
+    Create a DataFrame row for a new monster.
+    
+    :param name: Monster's name
+    :param hp: Monster's health points
+    :param exp: Experience points given by the monster
+    :param race: Monster's race
+    :param speed: Monster's speed
+    :param dps: Damage per second of the monster
+    :param attacks_count: Number of attacks
+    :param attacks: Descriptions of attacks
+    :param armor_defense: Combined value of armor and defense
+    :param defenses_count: Number of defenses
+    :param defense: Descriptions of defenses
+    :param loot: Loot dropped by the monster
+    :return: DataFrame row with the monster's data
+    """
+    data = {
+        'NAME': [name],
+        'HP': [hp],
+        'EXP': [exp],
+        'RACE': [race],
+        'SPEED': [speed],
+        'DPS': [dps],
+        'NUMBER OF ATTACKS': [attacks_count],
+        'ATTACKS': [attacks],
+        'ARMOR + DEFENSE': [armor_defense],
+        'NUMBER OF DEFENSES': [defenses_count],
+        'DEFENSE': [defense],
+        'LOOT': [loot],
+        'MONSTER_XML_TFS': [monster_xml_tfs],
+        'MONSTER_XML_RME': [monster_xml_rme]
+    }
+    return pd.DataFrame(data)
+
+
 
 def generate_loot(base_loot_json_min, base_loot_json_max, additional_loot_json):
     base_loot_min = base_loot_json_min if isinstance(base_loot_json_min, dict) else json.loads(base_loot_json_min or '[]')
@@ -18,11 +64,18 @@ def generate_loot(base_loot_json_min, base_loot_json_max, additional_loot_json):
     # Generate the base loot by randomizing between min and max values
     base_loot = []
     for min_item, max_item in zip(base_loot_min, base_loot_max):
-        item = {
-            "name": min_item["name"],  # Assuming the name remains the same for min and max
-            "countmax": random.randint(min_item["countmax"], max_item["countmax"]),
-            "chance": random.randint(min_item["chance"], max_item["chance"])
-        }
+        if "name" in min_item:
+            item = {
+                "name": min_item["name"],
+                "countmax": random.randint(min_item["countmax"], max_item["countmax"]),
+                "chance": random.randint(min_item["chance"], max_item["chance"])
+            }
+        else:
+            item = {
+                "id": min_item["id"],
+                "countmax": random.randint(min_item["countmax"], max_item["countmax"]),
+                "chance": random.randint(min_item["chance"], max_item["chance"])
+            }
         base_loot.append(item)
     
     # Combine base loot and additional loot
@@ -43,8 +96,8 @@ def generate_elements(monster, elements_min, elements_max):
 
         return elements_element
 
-def add_defenses_to_monster(monster, hp, speed):
-    defenses_element = SubElement(monster, 'defenses', {'armor': "15", 'defense': "15"})
+def add_defenses_to_monster(monster, hp, speed, armor):
+    defenses_element = SubElement(monster, 'defenses', {'armor': str(armor), 'defense': str(armor)})
 
     # Healing
     if random.choice([True, False]):  
@@ -56,7 +109,7 @@ def add_defenses_to_monster(monster, hp, speed):
             'min': str(int(0.05 * max_healing)),  
             'max': str(max_healing),
         })
-
+        monster_defenses_output.append(["healing","max: ", max_healing])
     # Speed
     if random.choice([True, False]):  
         speedchange = random.randint(int(speed * 1.2), 1000)
@@ -68,6 +121,7 @@ def add_defenses_to_monster(monster, hp, speed):
             'speedchange': str(speedchange),
             'duration': str(duration),
         })
+        monster_defenses_output.append(["speed", "speedchange:", speedchange, "duration: ", duration])
         SubElement(speed_defense, 'attribute', {'key': "areaEffect", 'value': "redshimmer"})
 
     # Invisible
@@ -79,6 +133,7 @@ def add_defenses_to_monster(monster, hp, speed):
             'chance': str(random.randint(5, 15)),
             'duration': str(duration),
         })
+        monster_defenses_output.append(["invisible", "duration: ", duration])
         SubElement(invisible_defense, 'attribute', {'key': "areaEffect", 'value': "blueshimmer"})
 
     # Outfit
@@ -93,6 +148,8 @@ def add_defenses_to_monster(monster, hp, speed):
             'monster': monster_name,
             'duration': str(duration),
         })
+        monster_defenses_output.append(["outfit: ", monster_name, "duration: ", duration])
+
        
 def distribute_dps(dps, attacks_count):
 
@@ -100,7 +157,6 @@ def distribute_dps(dps, attacks_count):
     return [round((percentages[i+1] - percentages[i]) * dps) for i in range(attacks_count)]
 
 def add_attacks_to_monster(monster, dps, attacks_count):
-    # Definicje ataków
     area_radius_attacks = [ "physical", "earth", "ice", "energy", "fire", "death", "holy",
                             "poison", "drown", "lifedrain", "manadrain", "speed", "drunk", "outfit",
                             "poisoncondition", "freezecondition", "firecondition", "energycondition", "drowncondition",
@@ -129,6 +185,8 @@ def add_melee_attack(monster, dps, attacks_count):
         'min': str(-int(dps / 4)),
         'max': str(-dps),
           })
+    monster_attacks_output.append(["melee", dps])
+
 
 def add_area_radius_attack(monster, attack_name, dps):
 
@@ -138,6 +196,7 @@ def add_area_radius_attack(monster, attack_name, dps):
         attack_element = SubElement(monster, 'attack', {
             'name': attack_name,
             'interval': str(random.randint(500, 2500)),
+            'chance': str(random.randint(5, 15)),
             'monster': random.choice(monster_names),
             'duration': str(random.randint(3000, 60000)),
             'range': str(random.randint(1, 7)),
@@ -147,6 +206,7 @@ def add_area_radius_attack(monster, attack_name, dps):
         attack_element = SubElement(monster, 'attack', {
             'name': attack_name,
             'interval': str(random.randint(500, 2500)),
+            'chance': str(random.randint(5, 15)),
             'duration':  str(random.randint(3000, 60000)),
             'range': str(random.randint(1, 7)),
             'radius': str(random.randint(0, 9)),
@@ -156,11 +216,13 @@ def add_area_radius_attack(monster, attack_name, dps):
         attack_element = SubElement(monster, 'attack', {
             'name': attack_name,
             'interval': str(random.randint(500, 2500)),
+            'chance': str(random.randint(5, 15)),
             'min': str(-int(dps / 4)),
             'max': str(-dps),
             'range': str(random.randint(1, 7)),
             'radius': str(random.randint(0, 9)),
         })
+    monster_attacks_output.append([attack_name, dps])
 
 def add_area_wave_attack(monster, attack_name, dps):
 
@@ -169,6 +231,7 @@ def add_area_wave_attack(monster, attack_name, dps):
         attack_element = SubElement(monster, 'attack', {
             'name': attack_name,
             'interval': str(random.randint(500, 2500)),
+            'chance': str(random.randint(5, 15)),
             'min': str(-int(dps / 4)),
             'max': str(-dps),
             'monster': random.choice(monster_names),
@@ -180,6 +243,7 @@ def add_area_wave_attack(monster, attack_name, dps):
         attack_element = SubElement(monster, 'attack', {
             'name': attack_name,
             'interval': str(random.randint(500, 2500)),
+            'chance': str(random.randint(5, 15)),
             'duration':  str(random.randint(3000, 60000)),
             'length': str(random.randint(1, 8)),
             'spread': str(random.randint(0, 3)),
@@ -188,11 +252,14 @@ def add_area_wave_attack(monster, attack_name, dps):
         attack_element = SubElement(monster, 'attack', {
             'name': attack_name,
             'interval': str(random.randint(500, 2500)),
+            'chance': str(random.randint(5, 15)),
             'min': str(-int(dps / 4)),
             'max': str(-dps),
             'length': str(random.randint(1, 8)),
             'spread': str(random.randint(0, 3)),
         })
+    monster_attacks_output.append([attack_name, dps])
+
 
 
 def generate_monster(row, min_values, max_values):
@@ -243,20 +310,23 @@ def generate_monster(row, min_values, max_values):
     for flag in ['summonable', 'attackable', 'hostile', 'illusionable', 'convinceable', 
                  'pushable', 'canpushitems', 'canpushcreatures', 'targetdistance', 
                  'staticattack', 'runonhealth', 'canwalkonenergy', 'canwalkonfire', 'canwalkonpoison']:
-        SubElement(flags, 'flag', {flag: "1" if flag == 'attackable' else "0"})
+        SubElement(flags, 'flag', {flag: "1" if flag == 'attackable' or flag == 'targetdistance' or flag == 'hostile' else "0"})
 
     attacks_container = SubElement(monster, 'attacks')
 
     add_attacks_to_monster(attacks_container, dps, attacks_count)
 
     
-    add_defenses_to_monster(monster, hp, speed)
+    add_defenses_to_monster(monster, hp, speed, armor)
 
     generate_elements(monster, elements_min, elements_max)
 
 
     if pd.notna(row['SENTENCES']) and not row['SENTENCES'].startswith('MIN VALUES') and not row['SENTENCES'].startswith('MAX VALUES'):
-        voices = SubElement(monster, 'voices')
+        voices = SubElement(monster, 'voices', {
+        'interval': str(5000),
+        'chance': str(10)
+    })
         sentences = row['SENTENCES'].split(';')
         for sentence in sentences:
             clean_sentence = sentence.strip()
@@ -268,27 +338,51 @@ def generate_monster(row, min_values, max_values):
 
     loot_element = SubElement(monster, 'loot')
     for item in loot:
-        SubElement(loot_element, 'item', {
-            'name': item['name'],
-            'countmax': str(item['countmax']),
-            'chance': str(item['chance'])
-        })
+        if "name" in item:
+            item_attributes = {
+                "name": item["name"],
+                'countmax': str(item['countmax']),
+                'chance': str(item['chance'])
+            }
+        elif "id" in item:
+            item_attributes = {
+                "id": item["id"],
+                'countmax': str(item['countmax']),
+                'chance': str(item['chance'])
+            }
+        SubElement(loot_element, 'item', item_attributes)
+
            
 
+
+    monster_xml_tfs = f'<monster name="{name}" file="folder/{name.lower().replace(" ", "_")}.xml" />'
+
+    monster_xml_rme = f'<creature name="{name}" type="monster" looktype="17" />'
+
+   
+
+    monster_row = create_monster_df_row(name, hp, exp, race, speed, dps, attacks_count, monster_attacks_output, armor_defense, len(monster_defenses_output), monster_defenses_output, loot, monster_xml_tfs, monster_xml_rme)
+    
     raw_xml = tostring(monster, 'utf-8', method='xml')
 
     pretty_xml_as_string = parseString(raw_xml).toprettyxml(indent="    ", encoding='UTF-8')
    
-    return pretty_xml_as_string, name.lower().replace(" ", "_")
+    return pretty_xml_as_string, name.lower().replace(" ", "_"), monster_row
+
+
 
 
 for i, row in data.iterrows():
     if pd.isna(row['NAME']) or i < 2:  
         continue
-    monster_xml_bytes, file_name = generate_monster(row, min_values, max_values)
+    monster_xml_bytes, file_name, monster_row = generate_monster(row, min_values, max_values)
     monster_xml_str = monster_xml_bytes.decode('utf-8')  
     file_path = f'monsters/{file_name}.xml'
     with open(file_path, 'w', encoding='utf-8') as file:  # Ensure the file is opened with utf-8 encoding
         file.write(monster_xml_str)  # Write the decoded string, not bytes
     print(f'Monster "{row["NAME"]}" saved to: {file_path}')
-
+    all_monsters_df = pd.concat([all_monsters_df, monster_row], ignore_index=True)
+    monster_attacks_output = []
+    monster_defenses_output = []
+# Move saving the DataFrame to outside the loop to write it once after all rows are added
+all_monsters_df.to_excel(output_file_path, engine='odf', index=False)
